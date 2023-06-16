@@ -1,7 +1,7 @@
 package types
 
 type Video struct {
-	Title       string `json:"title" binding:"min=2,max=20"`
+	Title       string `json:"title" binding:"min=2,max=20" validate:"is-title-ok"`
 	Description string `json:"description"`
 	URL         string `json:"url" binding:"required,url"`
 	Author      Person `json:"author" binding:"required"`
