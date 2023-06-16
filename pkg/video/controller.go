@@ -22,7 +22,7 @@ func NewController(s VideoService) VideoController {
 
 func (c *videoController) Save(ctx *gin.Context) (types.Video, error) {
 	var v types.Video
-	if err := ctx.BindJSON(&v); err != nil {
+	if err := ctx.ShouldBindJSON(&v); err != nil {
 		return v, err
 	}
 	c.service.Save(v)

@@ -34,7 +34,9 @@ func main() {
 	server.POST("/save", func(ctx *gin.Context) {
 		v, err := controller.Save(ctx)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, nil)
+			ctx.JSON(http.StatusBadRequest, gin.H {
+				"error": err.Error(),
+			})
 			return
 		}
 		ctx.JSON(http.StatusOK, v)
