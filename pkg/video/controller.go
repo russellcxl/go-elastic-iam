@@ -1,6 +1,8 @@
 package video
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/russellcxl/go-elastic-iam/pkg/types"
@@ -10,6 +12,7 @@ import (
 type VideoController interface {
 	Save(*gin.Context) (*types.Video, error)
 	FindAll() []types.Video
+	ShowAll(*gin.Context)
 }
 
 type videoController struct {
@@ -26,7 +29,7 @@ func NewController(s VideoService) VideoController {
 		validate.RegisterValidation(tag, v)
 	}
 
-	return &videoController {
+	return &videoController{
 		service: s,
 	}
 }
@@ -45,4 +48,13 @@ func (c *videoController) Save(ctx *gin.Context) (*types.Video, error) {
 
 func (c *videoController) FindAll() []types.Video {
 	return c.service.FindAll()
+}
+
+func (c *videoController) ShowAll(ctx *gin.Context) {
+	videos := c.service.FindAll()
+	data := gin.H {
+		"title": "Video Page",
+		"videos": videos,
+	}
+	ctx.HTML(http.StatusOK, "index.html", data)
 }

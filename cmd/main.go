@@ -9,11 +9,20 @@ import (
 	gindump "github.com/tpkeeper/gin-dump"
 )
 
+var server *gin.Engine
+var controller video.VideoController
+
 func main() {
 	service := video.NewService()
-	controller := video.NewController(service)
-	server := gin.New()
+	controller = video.NewController(service)
+
+	// initialise gin engine
+	server = gin.New()
+	server.Static("../templates/css", "./templates/css")
+	server.LoadHTMLGlob("./templates/*.html")
 	middlewares.SetLogOutput("logs/data.log") // writes to specified file and console
+
+	// add middlewares
 	server.Use(
 		gin.Recovery(),
 		middlewares.Logger(), // custom logger
@@ -21,26 +30,35 @@ func main() {
 		gindump.Dump(),       // more logging info
 	)
 
-	server.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": "OK",
-		})
-	})
-
-	server.GET("/videos", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, controller.FindAll())
-	})
-
-	server.POST("/save", func(ctx *gin.Context) {
-		v, err := controller.Save(ctx)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H {
-				"error": err.Error(),
-			})
-			return
-		}
-		ctx.JSON(http.StatusOK, v)
-	})
-
+	// specify routes
+	handleApiRoutes()
+	handleViewRoutes()
 	server.Run(":8080")
+}
+
+func handleApiRoutes() {
+	route := server.Group("/api")
+	{
+		route.GET("/videos", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, controller.FindAll())
+		})
+	
+		route.POST("/save", func(ctx *gin.Context) {
+			v, err := controller.Save(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H {
+					"error": err.Error(),
+				})
+				return
+			}
+			ctx.JSON(http.StatusOK, v)
+		})
+	}
+}
+
+func handleViewRoutes() {
+	route := server.Group("/view")
+	{
+		route.GET("/videos", controller.ShowAll)
+	}
 }
