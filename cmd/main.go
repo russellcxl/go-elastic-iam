@@ -34,7 +34,7 @@ func main() {
 	// specify routes
 	handleApiRoutes()
 	handleViewRoutes()
-	
+
 	godotenv.Load(".env")
 	port, found := os.LookupEnv("PORT")
 	if !found {
@@ -65,5 +65,10 @@ func handleApiRoutes() {
 }
 
 func handleViewRoutes() {
+	server.GET("/", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "OK",
+		})
+	})
 	server.GET("/videos", controller.ShowAll)
 }
