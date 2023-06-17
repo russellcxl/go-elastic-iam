@@ -2,8 +2,10 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/russellcxl/go-elastic-iam/pkg/middlewares"
 	"github.com/russellcxl/go-elastic-iam/pkg/video"
 	gindump "github.com/tpkeeper/gin-dump"
@@ -32,34 +34,36 @@ func main() {
 	// specify routes
 	handleApiRoutes()
 	handleViewRoutes()
-	server.Run(":8080")
+	
+	godotenv.Load(".env")
+	port, found := os.LookupEnv("PORT")
+	if !found {
+		port = "5000"
+	}
+	server.Run(":" + port)
 }
 
 func handleApiRoutes() {
 
 	// basic auth only applied to /api routes
 	route := server.Group("/api", middlewares.Auth())
-	{
-		route.GET("/videos", func(ctx *gin.Context) {
-			ctx.JSON(http.StatusOK, controller.FindAll())
-		})
-	
-		route.POST("/save", func(ctx *gin.Context) {
-			v, err := controller.Save(ctx)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H {
-					"error": err.Error(),
-				})
-				return
-			}
-			ctx.JSON(http.StatusOK, v)
-		})
-	}
+
+	// define routes
+	route.GET("/videos", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, controller.FindAll())
+	})
+	route.POST("/save", func(ctx *gin.Context) {
+		v, err := controller.Save(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, v)
+	})
 }
 
 func handleViewRoutes() {
-	route := server.Group("/view")
-	{
-		route.GET("/videos", controller.ShowAll)
-	}
+	server.GET("/videos", controller.ShowAll)
 }
