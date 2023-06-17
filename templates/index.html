@@ -3,9 +3,7 @@
 <div>
     {{ range .videos }}
     <div>
-        <p>Title: {{ .Title }}</p>
-        <p>Description: {{ .Description }}</p>
-        <div>***</div>
+        <li>Title: {{ .Title }} || Description: {{.Description}} || Author: {{.Author}}</li>
     </div>
     {{ end }}
 </div>

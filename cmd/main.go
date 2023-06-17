@@ -26,7 +26,6 @@ func main() {
 	server.Use(
 		gin.Recovery(),
 		middlewares.Logger(), // custom logger
-		middlewares.Auth(),   // basic auth
 		gindump.Dump(),       // more logging info
 	)
 
@@ -37,7 +36,9 @@ func main() {
 }
 
 func handleApiRoutes() {
-	route := server.Group("/api")
+
+	// basic auth only applied to /api routes
+	route := server.Group("/api", middlewares.Auth())
 	{
 		route.GET("/videos", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, controller.FindAll())
