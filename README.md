@@ -1,5 +1,11 @@
 # Go HTTP app
 
+## Features
+- Gin HTTP server with routing groups
+- Middlewares (auth, logger)
+- JSON tag custom validator
+- Simple HTML page
+
 ## Deploying on EB
 - Create files: `build.sh`, `Buildfile`, `Procfile`
 - Install EB (requires python)
