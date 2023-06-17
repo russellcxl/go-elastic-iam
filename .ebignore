@@ -1,0 +1,14 @@
+# Ignore source files
+
+cmd/
+logs/
+pkg/
+scripts/
+templates/
+go.mod
+go.sum
+README.md
+Dockerfile
+
+# Ignore git files
+.gitignore
