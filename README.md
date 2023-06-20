@@ -18,7 +18,7 @@
 - Run `eb create` to create an instance. EB will create a bunch of stuff for you e.g. auto-scaling group, cloudwatch alarms, load balancers, etc.
 - Run `eb deploy` to update deployment
 
-## Deploying on EB with Docker
+## Deploying on EB with Docker (incomplete)
 - Create Dockerfile
 - Test locally
     ```bash
