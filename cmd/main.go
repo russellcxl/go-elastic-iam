@@ -7,7 +7,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/russellcxl/go-elastic-iam/pkg/handler"
 	"github.com/russellcxl/go-elastic-iam/pkg/middlewares"
-	gindump "github.com/tpkeeper/gin-dump"
 )
 
 var server *gin.Engine
@@ -24,7 +23,6 @@ func main() {
 	server.Use(
 		gin.Recovery(),
 		middlewares.Logger(), // custom logger
-		gindump.Dump(),       // more logging info
 	)
 
 	// map routes

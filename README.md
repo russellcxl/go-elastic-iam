@@ -6,9 +6,9 @@
 - JSON tag custom validator
 - Simple HTML page
 
-## Deploying on EB
+## Deploying on EB without Docker
 - Create files: `build.sh`, `Buildfile`, `Procfile`
-- Install EB (requires python)
+- Install EB (requires python; make sure it's in your PATH)
   ```bash
   export PATH="$HOME/.ebcli-virtual-env/executables:$PATH"
   export PATH="/opt/homebrew/bin:$PATH"
