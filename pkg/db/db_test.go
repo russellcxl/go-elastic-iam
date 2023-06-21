@@ -1,11 +1,11 @@
-package db_test
+package db
 
 import (
 	"testing"
 
-	"github.com/russellcxl/go-elastic-iam/pkg/db"
 )
 
-func TestConnect(t *testing.T) {
-	db.Connect()
+func TestDB(t *testing.T) {
+	Initialise()
+	migrate()
 }

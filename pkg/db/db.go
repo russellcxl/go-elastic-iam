@@ -2,18 +2,21 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
-	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	_ "github.com/lib/pq"
 )
 
-func Connect() {
-	godotenv.Load("../../.env")
+var DB *gorm.DB
+var requireMigration bool
+
+func Initialise() {
 	var dbName string = os.Getenv("DB_NAME")
 	var dbUser string = os.Getenv("DB_USER")
 	var dbHost string = os.Getenv("DB_HOST")
@@ -37,23 +40,17 @@ func Connect() {
 		dbHost, dbPort, dbUser, authenticationToken, dbName,
 	)
 
-	db, err := sql.Open("postgres", dsn)
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+
 	if err != nil {
-		panic(err)
+		panic("failed to connect to db: " + err.Error())
 	}
 
-	defer db.Close()
+	fmt.Println("Connected to postgres!")
 
-	err = db.Ping()
-	if err != nil {
-		panic(err)
+	if requireMigration {
+		migrate()
 	}
-
-	// Create the new database
-	_, err = db.Exec("CREATE DATABASE animals")
-	if err != nil {
-		panic("failed to create database: " + err.Error())
-	}
-
-	fmt.Println("Database created successfully!")
 }

@@ -1,6 +1,10 @@
 package video
 
-import "github.com/russellcxl/go-elastic-iam/pkg/types"
+import (
+	"github.com/russellcxl/go-elastic-iam/pkg/db"
+	"github.com/russellcxl/go-elastic-iam/pkg/types"
+	"gorm.io/gorm"
+)
 
 type VideoService interface {
 	Save(types.Video) types.Video
@@ -8,11 +12,14 @@ type VideoService interface {
 }
 
 type videoService struct {
+	db *gorm.DB
 	videos []types.Video
 }
 
 func NewService() VideoService {
-	return new(videoService)
+	return &videoService{
+		db: db.DB,
+	}
 }
 
 func (s *videoService) Save(v types.Video) types.Video {

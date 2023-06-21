@@ -1,10 +1,10 @@
 # Go HTTP app
 
 ## Features
-- Gin HTTP server with routing groups
-- Middlewares (auth, logger)
+- Gin HTTP server + middlewares (auth, logger)
 - JSON tag custom validator
-- Simple HTML page
+- HTML pages
+- AWS RDS postgres
 
 ## Deploying on EB without Docker
 - Create files: `build.sh`, `Buildfile`, `Procfile`
@@ -18,7 +18,7 @@
 - Run `eb create` to create an instance. EB will create a bunch of stuff for you e.g. auto-scaling group, cloudwatch alarms, load balancers, etc.
 - Run `eb deploy` to update deployment
 
-## Deploying on EB with Docker (incomplete)
+## Deploying on EB with Docker (WIP)
 - Create Dockerfile
 - Test locally
     ```bash

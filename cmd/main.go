@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/russellcxl/go-elastic-iam/pkg/db"
 	"github.com/russellcxl/go-elastic-iam/pkg/handler"
 	"github.com/russellcxl/go-elastic-iam/pkg/middlewares"
 )
@@ -12,6 +13,10 @@ import (
 var server *gin.Engine
 
 func main() {
+
+	//initialise db
+	godotenv.Load(".env")
+	db.Initialise()
 
 	// initialise gin engine
 	server = gin.New()

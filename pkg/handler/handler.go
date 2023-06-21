@@ -4,22 +4,25 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/russellcxl/go-elastic-iam/pkg/author"
 	"github.com/russellcxl/go-elastic-iam/pkg/middlewares"
 	"github.com/russellcxl/go-elastic-iam/pkg/video"
 )
 
 type Handler struct {
-	server *gin.Engine
-	controller video.VideoController
+	server           *gin.Engine
+	videoController  video.VideoController
+	authorController author.AuthorController
 }
 
 func HandleRoutes(s *gin.Engine) {
 	h := &Handler{
-		server: s,
-		controller: video.NewController(),
+		server:           s,
+		videoController:  video.NewController(),
+		authorController: author.NewController(),
 	}
 	h.handleAPIRoutes()
-	h.handleViewRoutes()
+	h.handlePublicRoutes()
 }
 
 func (h *Handler) handleAPIRoutes() {
@@ -27,12 +30,12 @@ func (h *Handler) handleAPIRoutes() {
 	// basic auth only applied to /api routes
 	route := h.server.Group("/api", middlewares.Auth())
 
-	// define routes
+	// video routes
 	route.GET("/videos", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, h.controller.FindAll())
+		ctx.JSON(http.StatusOK, h.videoController.FindAll())
 	})
 	route.POST("/save", func(ctx *gin.Context) {
-		v, err := h.controller.Save(ctx)
+		v, err := h.videoController.Save(ctx)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
@@ -41,18 +44,24 @@ func (h *Handler) handleAPIRoutes() {
 		}
 		ctx.JSON(http.StatusOK, v)
 	})
+
+	// author routes
+	route.GET("/authors", h.authorController.GetAll)
+	route.GET("/author", h.authorController.Get)
+	route.POST("/author", h.authorController.Save)
+
 }
 
-func (h *Handler) handleViewRoutes() {
+func (h *Handler) handlePublicRoutes() {
 	h.server.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "OK",
 		})
 	})
 	h.server.GET("/videos", func(ctx *gin.Context) {
-		videos := h.controller.FindAll()
-		data := gin.H {
-			"title": "Video Page",
+		videos := h.videoController.FindAll()
+		data := gin.H{
+			"title":  "Video Page",
 			"videos": videos,
 		}
 		ctx.HTML(http.StatusOK, "index.html", data)
