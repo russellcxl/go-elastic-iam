@@ -1,10 +1,11 @@
 # Go HTTP app
 
 ## Features
-- Gin HTTP server + middlewares (auth, logger)
+- Gin HTTP server
+- Gin middlewares (auth, logger)
+- AWS RDS postgres
 - JSON tag custom validator
 - HTML pages
-- AWS RDS postgres
 
 ## Deploying on EB without Docker
 - Create files: `build.sh`, `Buildfile`, `Procfile`
