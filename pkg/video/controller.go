@@ -14,20 +14,20 @@ type VideoController interface {
 
 type videoController struct {
 	service VideoService
+	validator *validator.Validate
 }
-
-var validate *validator.Validate
 
 func NewController() VideoController {
 
 	// add all validations for custom json validation tags e.g. `validation:"is-title-ok"`
-	validate = validator.New()
+	validate := validator.New()
 	for tag, v := range validators.Validations {
 		validate.RegisterValidation(tag, v)
 	}
 
 	return &videoController{
 		service: NewService(),
+		validator: validate,
 	}
 }
 
@@ -36,7 +36,7 @@ func (c *videoController) Save(ctx *gin.Context) (*types.Video, error) {
 	if err := ctx.ShouldBindJSON(&v); err != nil {
 		return nil, err
 	}
-	if err := validate.Struct(v); err != nil {
+	if err := c.validator.Struct(v); err != nil {
 		return nil, err
 	}
 	c.service.Save(v)
