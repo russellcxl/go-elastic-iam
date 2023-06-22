@@ -1,6 +1,8 @@
 package video
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/russellcxl/go-elastic-iam/pkg/types"
@@ -8,12 +10,13 @@ import (
 )
 
 type VideoController interface {
-	Save(*gin.Context) (*types.Video, error)
-	FindAll() []types.Video
+	Save(*gin.Context)
+	FindAll(*gin.Context)
+	ShowAll(*gin.Context)
 }
 
 type videoController struct {
-	service VideoService
+	service   VideoService
 	validator *validator.Validate
 }
 
@@ -26,23 +29,39 @@ func NewController() VideoController {
 	}
 
 	return &videoController{
-		service: NewService(),
+		service:   NewService(),
 		validator: validate,
 	}
 }
 
-func (c *videoController) Save(ctx *gin.Context) (*types.Video, error) {
+func (c *videoController) Save(ctx *gin.Context) {
 	var v types.Video
 	if err := ctx.ShouldBindJSON(&v); err != nil {
-		return nil, err
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
 	}
 	if err := c.validator.Struct(v); err != nil {
-		return nil, err
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
 	}
 	c.service.Save(v)
-	return &v, nil
+	ctx.JSON(http.StatusOK, v)
 }
 
-func (c *videoController) FindAll() []types.Video {
-	return c.service.FindAll()
+func (c *videoController) FindAll(ctx *gin.Context) {
+	videos := c.service.FindAll()
+	ctx.JSON(http.StatusOK, videos)
+}
+
+func (c *videoController) ShowAll(ctx *gin.Context) {
+	videos := c.service.FindAll()
+	data := gin.H{
+		"title":  "Video Page",
+		"videos": videos,
+	}
+	ctx.HTML(http.StatusOK, "index.html", data)
 }

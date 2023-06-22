@@ -31,19 +31,8 @@ func (h *Handler) handleAPIRoutes() {
 	route := h.server.Group("/api", middlewares.Auth())
 
 	// video routes
-	route.GET("/videos", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, h.videoController.FindAll())
-	})
-	route.POST("/save", func(ctx *gin.Context) {
-		v, err := h.videoController.Save(ctx)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		ctx.JSON(http.StatusOK, v)
-	})
+	route.GET("/videos", h.videoController.FindAll)
+	route.POST("/save", h.videoController.Save)
 
 	// author routes
 	route.GET("/authors", h.authorController.GetAll)
@@ -58,12 +47,5 @@ func (h *Handler) handlePublicRoutes() {
 			"message": "OK",
 		})
 	})
-	h.server.GET("/videos", func(ctx *gin.Context) {
-		videos := h.videoController.FindAll()
-		data := gin.H{
-			"title":  "Video Page",
-			"videos": videos,
-		}
-		ctx.HTML(http.StatusOK, "index.html", data)
-	})
+	h.server.GET("/videos", h.videoController.ShowAll)
 }
