@@ -7,13 +7,12 @@ import (
 )
 
 type VideoService interface {
-	Save(types.Video) types.Video
-	FindAll() []types.Video
+	Save(types.Video) (*types.Video, error)
+	GetAll() ([]types.Video, error)
 }
 
 type videoService struct {
 	db *gorm.DB
-	videos []types.Video
 }
 
 func NewService() VideoService {
@@ -22,11 +21,19 @@ func NewService() VideoService {
 	}
 }
 
-func (s *videoService) Save(v types.Video) types.Video {
-	s.videos = append(s.videos, v)
-	return v
+func (s *videoService) Save(v types.Video) (*types.Video, error) {
+	res := s.db.Save(&v)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	return &v, nil
 }
 
-func (s *videoService) FindAll() []types.Video {
-	return s.videos
+func (s *videoService) GetAll() ([]types.Video, error) {
+	var v []types.Video
+	res := s.db.Preload("Author").Find(&v) // https://gorm.io/docs/preload.html
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	return v, nil
 }

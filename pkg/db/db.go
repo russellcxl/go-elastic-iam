@@ -7,10 +7,10 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
+	_ "github.com/lib/pq"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	_ "github.com/lib/pq"
 )
 
 var DB *gorm.DB
@@ -25,21 +25,29 @@ func Initialise() {
 	var profileName string = os.Getenv("AWS_PROFILE")
 	var dbEndpoint string = fmt.Sprintf("%s:%s", dbHost, dbPort)
 
-	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profileName))
-	if err != nil {
-		panic("configuration error: " + err.Error())
-	}
-
-	authenticationToken, err := auth.BuildAuthToken(
-		context.TODO(), dbEndpoint, region, dbUser, cfg.Credentials)
-	if err != nil {
-		panic("failed to create authentication token: " + err.Error())
-	}
-
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s",
-		dbHost, dbPort, dbUser, authenticationToken, dbName,
+		dbHost, dbPort, dbUser, "password", dbName,
 	)
 
+	// get IAM token if connecting to RDS
+	if dbHost != "localhost" {
+		cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithSharedConfigProfile(profileName))
+		if err != nil {
+			panic("configuration error: " + err.Error())
+		}
+
+		authenticationToken, err := auth.BuildAuthToken(
+			context.TODO(), dbEndpoint, region, dbUser, cfg.Credentials)
+		if err != nil {
+			panic("failed to create authentication token: " + err.Error())
+		}
+
+		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s",
+			dbHost, dbPort, dbUser, authenticationToken, dbName,
+		)
+	}
+
+	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})

@@ -48,17 +48,35 @@ func (c *videoController) Save(ctx *gin.Context) {
 		})
 		return
 	}
-	c.service.Save(v)
-	ctx.JSON(http.StatusOK, v)
+	newV, err := c.service.Save(v)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, newV)
 }
 
 func (c *videoController) FindAll(ctx *gin.Context) {
-	videos := c.service.FindAll()
+	videos, err := c.service.GetAll()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 	ctx.JSON(http.StatusOK, videos)
 }
 
 func (c *videoController) ShowAll(ctx *gin.Context) {
-	videos := c.service.FindAll()
+	videos, err := c.service.GetAll()
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 	data := gin.H{
 		"title":  "Video Page",
 		"videos": videos,
